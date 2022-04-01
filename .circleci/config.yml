@@ -4,7 +4,9 @@ commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
-      # Add parameter here   
+      workflow_id: 
+        type: string
+        value: pipeline.id  
     steps:
       - run:
           name: Destroy environments
@@ -47,7 +49,7 @@ jobs:
       - run: 
           name: Lint frontend
           command: |
-            npm run lint
+            npm run build
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
@@ -60,10 +62,13 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - run:
-          name: Back-end build
+          name: install dependencies
           command: |
-             # Your code here
-             exit 1
+             npm i
+      - run:
+          name: build
+          command: |
+             npm run build
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
@@ -76,14 +81,21 @@ jobs:
       - restore_cache:
           keys:
             - frontend-build
-      - run:                 
+      - run:      
+          command: npm run test           
   test-backend:
     docker:
-      # Docker image here
+      - image: circleci/node:13.8.0
     steps:
-      # Checkout code from git
-      # Restore from cache
-      # Your job code here
+      - checkout
+      - restore_cache:
+          keys:
+            - backend-build
+      - run:
+          command:
+          npm run test
+          npm run test:e2e
+          npm run test:cov
             
   scan-frontend:
     docker:
@@ -156,9 +168,9 @@ jobs:
 
   run-migrations:
     docker:
-      # Docker image here that supports NodeJS
+      - image: circleci/node:13.8.0
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Run migrations
           command: |
