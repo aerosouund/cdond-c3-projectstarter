@@ -6,14 +6,15 @@ commands:
     parameters:
       workflow_id: 
         type: string
-        value: << pipeline.id >>
+        value: ${CIRCLE_WORKFLOW_ID}
 
     steps:
       - run:
           name: Destroy environments
           when: on_fail
           command: |
-            aw
+            aws cloudformation delete-stack --stack-name frontEnd-<< workflow_id >>
+            aws cloudformation delete-stack --stack-name backEnd-<< workflow_id >>
             exit 1
 
   revert-migrations:
