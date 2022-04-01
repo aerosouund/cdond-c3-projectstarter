@@ -6,7 +6,8 @@ commands:
     parameters:
       workflow_id: 
         type: string
-        value: pipeline.id  
+        value: << pipeline.id >>
+
     steps:
       - run:
           name: Destroy environments
