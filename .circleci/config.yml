@@ -34,11 +34,16 @@ commands:
             #  Add revert code here. You can find this in the Getting Started section.
               exit 1
             fi
+
+
+node_image: &node_image
+  docker:
+    - image: circleci/node:13.8.0
+
             
 jobs:
   build-frontend:
-    docker:
-      - image: circleci/node:13.8.0
+    << *node_image
     steps:
       - checkout
       - restore_cache:
@@ -57,7 +62,7 @@ jobs:
 
   build-backend:
     docker:
-      - image: circleci/node:13.8.0
+      << *node_image
     steps:
       - checkout
       - restore_cache:
@@ -75,8 +80,7 @@ jobs:
           key: backend-build
 
   test-frontend:
-    docker:
-      - image: circleci/node:13.8.0
+    << *node_image
     steps:
       - checkout
       - restore_cache:
@@ -85,8 +89,7 @@ jobs:
       - run:      
           command: npm run test           
   test-backend:
-    docker:
-      - image: circleci/node:13.8.0
+    << *node_image
     steps:
       - checkout
       - restore_cache:
@@ -99,8 +102,7 @@ jobs:
           npm run test:cov
             
   scan-frontend:
-    docker:
-      - image: circleci/node:13.8.0
+    << *node_image
     steps:
       - checkout
       - restore_cache:
@@ -110,8 +112,7 @@ jobs:
           npm audit
 
   scan-backend:
-    docker:
-      - image: circleci/node:13.8.0
+    << *node_image
     steps:
       - checkout
       - restore_cache:
