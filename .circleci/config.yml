@@ -159,18 +159,20 @@ jobs:
     docker:
       - image: python:3.7-alpine3.11
     steps:
-      # Checkout code from git
-      # Add ssh keys with fingerprint
-      # attach workspace
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["ff:1e:ed:36:12:30:81:b4:58:35:ae:2a:71:e1:8a:47"]
+      - attach_workspace:
+          at: project/.circleci/ansible/inventory.txt
       - run:
           name: Install dependencies
           command: |
-            # Your code here
+            apk add --update ansible
             exit 1
       - run:
           name: Configure server
           command: |
-            # Your code here
+            ansible-playbook -i inventory.txt configure-server.yml
             exit 1
       # Here's where you will add some code to rollback on failure      
 
