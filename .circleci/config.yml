@@ -111,17 +111,20 @@ jobs:
 
   scan-backend:
     docker:
-      # Docker image here
+      - image: circleci/node:13.8.0
     steps:
-      # Checkout code from git
-      # Restore from cache
-      # Your job code here
+      - checkout
+      - restore_cache:
+        keys: [build-backend]
+      - run:
+          command:
+          npm audit
 
   deploy-infrastructure:
     docker:
-      # Docker image here that supports AWS CLI
+      - image: amazon/awscli
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -136,9 +139,9 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
-              #--tags project=your-tag \
-              # --stack-name "your front-end stack name with workflow id" \
-              # --parameter-overrides ID="your workflow id"  
+              --tags project=${} \
+              # --stack-name frontEnd-${CIRCLE_WORKFLOW_ID} \
+              # --parameter-overrides ID=${CIRCLE_WORKFLOW_ID} 
               exit 1
       - run:
           name: Add back-end ip to ansible inventory
@@ -149,7 +152,7 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      # Here's where you will add some code to rollback on failure      
+      - delete_infrastructure    
 
   configure-infrastructure:
     docker:
