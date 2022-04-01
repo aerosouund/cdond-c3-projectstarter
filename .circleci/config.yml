@@ -10,7 +10,7 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
-            # Your code here
+            aw
             exit 1
 
   revert-migrations:
@@ -43,8 +43,11 @@ jobs:
       - run:
           name: Build front-end
           command: |
-            # Your code here
-            exit 1
+            npm i
+      - run: 
+          name: Lint frontend
+          command: |
+            npm run lint
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
@@ -67,12 +70,13 @@ jobs:
 
   test-frontend:
     docker:
-      # Docker image here
+      - image: circleci/node:13.8.0
     steps:
-      # Checkout code from git
-      # Restore from cache
-      # Your job code here
-                
+      - checkout
+      - restore_cache:
+          keys:
+            - frontend-build
+      - run:                 
   test-backend:
     docker:
       # Docker image here
