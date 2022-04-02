@@ -13,9 +13,8 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name frontEnd-<< workflow_id >>
-            aws cloudformation delete-stack --stack-name backEnd-<< workflow_id >>
-            exit 1
+            aws cloudformation delete-stack --stack-name frontEnd-<< parameters.workflow_id >>
+            aws cloudformation delete-stack --stack-name backEnd-<< parameters.workflow_id >>
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -60,8 +59,7 @@ jobs:
           key: frontend-build
 
   build-backend:
-    docker:
-      <<: *node_image
+    <<: *node_image
     steps:
       - checkout
       - restore_cache:
@@ -96,6 +94,7 @@ jobs:
             - backend-build
       - run:
           command: |
+            cd backend
             npm run test
             npm run test:e2e
             npm run test:cov
@@ -168,12 +167,10 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update ansible
-            exit 1
       - run:
           name: Configure server
           command: |
             ansible-playbook -i inventory.txt configure-server.yml
-            exit 1
       # Here's where you will add some code to rollback on failure      
 
   run-migrations:
@@ -197,7 +194,7 @@ jobs:
     docker:
       # Docker image here that supports AWS CLI
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Install dependencies
           command: |
