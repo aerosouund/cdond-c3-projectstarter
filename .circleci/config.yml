@@ -171,7 +171,7 @@ jobs:
           name: Configure server
           command: |
             ansible-playbook -i inventory.txt configure-server.yml
-      # Here's where you will add some code to rollback on failure      
+      - destroy_environment     
 
   run-migrations:
     docker:
@@ -188,7 +188,7 @@ jobs:
           command: |
             # Your code here
             exit 1
-     # Here's where you will add some code to rollback on failure      
+     - destroy_environemnt     
 
   deploy-frontend:
     docker:
