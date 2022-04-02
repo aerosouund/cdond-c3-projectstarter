@@ -85,8 +85,8 @@ jobs:
             - frontend-build
       - run:      
           command: |
-          cd frontend
-          npm run test           
+            cd frontend
+            npm run test           
   test-backend:
     <<: *node_image
     steps:
@@ -95,10 +95,10 @@ jobs:
           keys:
             - backend-build
       - run:
-          command:
-          npm run test
-          npm run test:e2e
-          npm run test:cov
+          command: |
+            npm run test
+            npm run test:e2e
+            npm run test:cov
             
   scan-frontend:
     <<: *node_image
@@ -108,7 +108,7 @@ jobs:
           keys: [build-frontend]
       - run:
           command: |
-          npm audit
+            npm audit
 
   scan-backend:
     <<: *node_image
@@ -118,7 +118,7 @@ jobs:
         keys: [build-backend]
       - run:
           command:
-          npm audit
+            npm audit
 
   deploy-infrastructure:
     docker:
@@ -130,7 +130,7 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
-              --tags project=Ammar \
+              --tags project=ammarBackend \
               --stack-name backEnd-${CIRCLE_WORKFLOW_ID} \
               --parameter-overrides ID=${CIRCLE_WORKFLOW_ID}  
               
@@ -139,14 +139,16 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
-              --tags project=Ammar \
+              --tags project=frontEnd \
               --stack-name frontEnd-${CIRCLE_WORKFLOW_ID} \
               --parameter-overrides ID=${CIRCLE_WORKFLOW_ID} 
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            # Your code here
-            exit 1
+            aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters "Name=tag:Project,Values=ammarBackend" \
+            --output text >> ansible/inventory
       - persist_to_workspace:
           root: ~/
           paths:
