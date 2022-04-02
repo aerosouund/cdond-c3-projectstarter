@@ -69,11 +69,9 @@ jobs:
       - run:
           name: install dependencies
           command: |
-             npm i
-      - run:
-          name: build
-          command: |
-             npm run build
+            cd backend
+            npm i
+            nom run build
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
