@@ -52,11 +52,9 @@ jobs:
       - run:
           name: Build front-end
           command: |
+            cd frontend
             npm i
-      - run: 
-          name: Lint frontend
-          command: |
-            npm run build
+            npm run build      
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
@@ -235,7 +233,7 @@ jobs:
     docker:
       # Lightweight Docker image 
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Install dependencies
           command: |
