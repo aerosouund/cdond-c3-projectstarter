@@ -42,7 +42,7 @@ node_image: &node_image
 
 aws_cli: &aws_cli
   docker:
-    - image: amazon/awscli
+    - image: amazon/aws-cli
 
 alpine: &alpine
   docker:
