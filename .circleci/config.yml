@@ -136,24 +136,25 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Ensure back-end infrastructure exists
+          name: deploy backend infrastructure
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
-              --tags project=ammarBackend \
-              --stack-name backEnd-${CIRCLE_WORKFLOW_ID} \
-              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID}  
+              --tags project=udacityBackend \
+              --stack-name backEnd-${CIRCLE_WORKFLOW_ID:0:5} \
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:5}  
               
       - run:
-          name: Ensure front-end infrastructure exist
+          name: deploy frontend infrastructure
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
-              --tags project=frontEnd \
+              --tags project=udacityfrontEnd \
               --stack-name frontEnd-${CIRCLE_WORKFLOW_ID:0:5} \
-              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID} 
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:5} 
       - run:
           name: Add back-end ip to ansible inventory
+          working_directory: ./.circleci/ansible
           command: |
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
@@ -171,7 +172,7 @@ jobs:
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprints: ["ff:1e:ed:36:12:30:81:b4:58:35:ae:2a:71:e1:8a:47"]
+          fingerprints: ["1c:58:c6:32:9b:75:69:70:7d:b3:79:62:6d:72:e5:d9"]
       - attach_workspace:
           at: project/.circleci/ansible/inventory.txt
       - run:
