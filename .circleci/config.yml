@@ -160,7 +160,7 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      - delete_infrastructure:
+      - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:5}   
 
   configure-infrastructure:
@@ -196,8 +196,8 @@ jobs:
           command: |
             # Your code here
             exit 1
-     - destroy_environemnt:
-        id: ${CIRCLE_WORKFLOW_ID:0:5} 
+      - destroy_environemnt:
+          id: ${CIRCLE_WORKFLOW_ID:0:5} 
 
   deploy-frontend:
     <<: *aws_cli
@@ -220,8 +220,7 @@ jobs:
       # Here's where you will add some code to rollback on failure      
                     
   deploy-backend:
-    docker:
-      <<: *alpine
+    <<: *alpine
     steps:
       - checkout
       - add_ssh_keys:
@@ -237,12 +236,11 @@ jobs:
           name: Deploy backend
           command: |
             # your code here
-      - destroy_infrastructure:
+      - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:5}
 
   smoke-test:
-    docker:
-      <<: *alpine
+    <<: *alpine
     steps:
       - checkout
       - run:
@@ -264,8 +262,7 @@ jobs:
       # Here's where you will add some code to rollback on failure  
 
   cloudfront-update:
-    docker:
-      <<: *aws_cli
+    <<: *aws_cli
     steps:
       - checkout
       - run:
@@ -280,8 +277,7 @@ jobs:
           id: ${CIRCLE_WORKFLOW_ID}
 
 cleanup:
-    docker:
-      <<: *alpine
+    <<: *alpine
     steps:
       - checkout
       - run:
