@@ -1,7 +1,7 @@
 version: 2.1
 
 commands:
-  destroy-environment:
+  destroy_environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
       workflow_id: 
@@ -18,7 +18,8 @@ commands:
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
-      # Add parameter here     
+      param:
+        type: string    
     steps:
       - run:
           name: Revert migrations
@@ -123,7 +124,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-        keys: [build-backend]
+          keys: [build-backend]
       - run:
           working_directory: ./backend
           command:
@@ -166,7 +167,7 @@ jobs:
           id: ${CIRCLE_WORKFLOW_ID:0:5}   
 
   configure-infrastructure:
-    
+    <<: *alpine
     steps:
       - checkout
       - add_ssh_keys:
@@ -310,22 +311,4 @@ workflows:
           requires: [build-backend]
       - scan-frontend:
           requires: [build-frontend]
-      - deploy-infrastructure:
-          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-          filters:
-            branches:
-              only: [test-feature-branch]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-      - run-migrations:
-          requires: [configure-infrastructure]
-      - deploy-frontend:
-          requires: [run-migrations]
-      - deploy-backend:
-          requires: [run-migrations]
-      - smoke-test:
-          requires: [deploy-backend, deploy-frontend]
-      - cloudfront-update:
-          requires: [smoke-test]
-      - cleanup:
-          requires: [cloudfront-update]
+      
