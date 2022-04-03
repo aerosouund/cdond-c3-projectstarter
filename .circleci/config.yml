@@ -135,6 +135,10 @@ jobs:
     steps:
       - checkout
       - run:
+          name: install dependencies
+          command: |
+            yum install -y tar gzip
+      - run:
           name: deploy backend infrastructure
           command: |
             aws cloudformation deploy \
@@ -149,8 +153,8 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --tags project=udacityfrontEnd \
-              --stack-name frontEnd-${CIRCLE_WORKFLOW_ID:0:5} \
-              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:5} 
+              --stack-name frontEnd-${CIRCLE_WORKFLOW_ID:0:7} \
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7} 
       - run:
           name: Add back-end ip to ansible inventory
           working_directory: ./.circleci/ansible
@@ -158,7 +162,7 @@ jobs:
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters "Name=tag:Project,Values=ammarBackend" \
-            --output text >> ansible/inventory
+            --output text >> inventory
       - persist_to_workspace:
           root: ~/
           paths:
@@ -312,4 +316,5 @@ workflows:
           requires: [build-backend]
       - scan-frontend:
           requires: [build-frontend]
+      - deploy-infrastructure
       
