@@ -6,7 +6,6 @@ commands:
     parameters:
       workflow_id: 
         type: string
-        value: ${CIRCLE_WORKFLOW_ID}
 
     steps:
       - run:
@@ -39,6 +38,14 @@ commands:
 node_image: &node_image
   docker:
     - image: circleci/node:13.8.0
+
+aws_cli: &aws_cli
+  docker:
+    - image: amazon/awscli
+
+alpine: &alpine
+  docker:
+    - image: python:3.7-alpine3.11
 
             
 jobs:
@@ -106,8 +113,9 @@ jobs:
       - restore_cache:
           keys: [build-frontend]
       - run:
+          working_directory: ./frontend
           command: |
-            npm audit
+            npm audit --audit-level=critical
 
   scan-backend:
     <<: *node_image
@@ -116,12 +124,12 @@ jobs:
       - restore_cache:
         keys: [build-backend]
       - run:
+          working_directory: ./backend
           command:
-            npm audit
+            npm audit --audit-level=critical
 
   deploy-infrastructure:
-    docker:
-      - image: amazon/awscli
+    <<: *aws_cli
     steps:
       - checkout
       - run:
@@ -139,7 +147,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --tags project=frontEnd \
-              --stack-name frontEnd-${CIRCLE_WORKFLOW_ID} \
+              --stack-name frontEnd-${CIRCLE_WORKFLOW_ID:0:5} \
               --parameter-overrides ID=${CIRCLE_WORKFLOW_ID} 
       - run:
           name: Add back-end ip to ansible inventory
@@ -152,11 +160,11 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      - delete_infrastructure    
+      - delete_infrastructure:
+          id: ${CIRCLE_WORKFLOW_ID:0:5}   
 
   configure-infrastructure:
-    docker:
-      - image: python:3.7-alpine3.11
+    
     steps:
       - checkout
       - add_ssh_keys:
@@ -171,7 +179,8 @@ jobs:
           name: Configure server
           command: |
             ansible-playbook -i inventory.txt configure-server.yml
-      - destroy_environment     
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:5}     
 
   run-migrations:
     docker:
@@ -191,8 +200,7 @@ jobs:
      - destroy_environemnt     
 
   deploy-frontend:
-    docker:
-      # Docker image here that supports AWS CLI
+    <<: *aws_cli
     steps:
       - checkout
       - run:
@@ -213,24 +221,28 @@ jobs:
                     
   deploy-backend:
     docker:
-      # Docker image here that supports Ansible
+      <<: *alpine
     steps:
-      # Checkout code from git
-      # Add ssh keys with fingerprint
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["ff:1e:ed:36:12:30:81:b4:58:35:ae:2a:71:e1:8a:47"]
       # attach workspace
       - run:
           name: Install dependencies
+          working_directory: /tmp
           command: |
-            # your code here
+            apk add --update ansible curl npm nodejs
+            pip install awscli
       - run:
           name: Deploy backend
           command: |
             # your code here
-      # Here's where you will add some code to rollback on failure  
+      - destroy_infrastructure:
+          id: ${CIRCLE_WORKFLOW_ID:0:5}
 
   smoke-test:
     docker:
-      # Lightweight Docker image 
+      <<: *alpine
     steps:
       - checkout
       - run:
@@ -253,9 +265,9 @@ jobs:
 
   cloudfront-update:
     docker:
-      # Docker image here that supports AWS CLI
+      <<: *aws_cli
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Install dependencies
           command: |
@@ -264,13 +276,13 @@ jobs:
           name: Update cloudfront distribution
           command: |
             # your code here
-      # Here's where you will add some code to rollback on failure  
+      - destroy_environment 
 
 cleanup:
     docker:
-      # Docker image here
+      <<: *alpine
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Get old stack workflow id
           command: |
