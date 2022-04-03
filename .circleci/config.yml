@@ -183,8 +183,7 @@ jobs:
           id: ${CIRCLE_WORKFLOW_ID:0:5}     
 
   run-migrations:
-    docker:
-      - image: circleci/node:13.8.0
+    <<: *node_image
     steps:
       - checkout
       - run:
@@ -197,7 +196,8 @@ jobs:
           command: |
             # Your code here
             exit 1
-     - destroy_environemnt     
+     - destroy_environemnt:
+        id: ${CIRCLE_WORKFLOW_ID:0:5} 
 
   deploy-frontend:
     <<: *aws_cli
@@ -276,7 +276,8 @@ jobs:
           name: Update cloudfront distribution
           command: |
             # your code here
-      - destroy_environment 
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID}
 
 cleanup:
     docker:
