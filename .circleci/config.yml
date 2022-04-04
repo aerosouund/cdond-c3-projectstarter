@@ -208,7 +208,7 @@ jobs:
             if grep -q "has been executed successfully." ~/project/backend/migrations-log.txt
             then
                 curl -i https://kvdb.io/3yfxqrxiUbHC7JsDyQVhMj/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
-      - destroy_environemnt:
+      - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7} 
 
   deploy-frontend:
