@@ -220,7 +220,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o 'awscliv2.zip'
             unzip awscliv2.zip
             sudo ./aws/install
       - attach_workspace:
@@ -229,7 +229,7 @@ jobs:
           name: Get backend url
           working_directory: ./frontend
           command: |
-            export BACKEND_IP = ${aws ec2 describe-instances \
+            export BACKEND_IP=${aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters "Name=tag:project,Values=udacityBackend"}
             export API_URL="http://${BACKEND_IP}:3030"
