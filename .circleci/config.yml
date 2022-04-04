@@ -188,8 +188,6 @@ jobs:
           name: Configure server
           working_directory: ./.circleci/ansible
           command: |
-            pwd
-            cat inventory
             ansible-playbook -i inventory configure-server.yml
       - destroy_environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}     
@@ -200,16 +198,18 @@ jobs:
       - checkout
       - run:
           name: Run migrations
+          working_directory: ./backend
           command: |
-            # Your code here
-            exit 1
+            npm i
+            npm run migrations > migrations-log
       - run:
-          name: Send migration results to memstash
+          name: Send migration results to kvdb
           command: |
-            # Your code here
-            exit 1
+            if grep -q "has been executed successfully." ~/project/backend/migrations-log.txt
+            then
+                curl -i https://kvdb.io/3yfxqrxiUbHC7JsDyQVhMj/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
       - destroy_environemnt:
-          id: ${CIRCLE_WORKFLOW_ID:0:5} 
+          id: ${CIRCLE_WORKFLOW_ID:0:7} 
 
   deploy-frontend:
     <<: *aws_cli
@@ -324,4 +324,11 @@ workflows:
       - configure-infrastructure:
           requires:
             - deploy-infrastructure
+      - run-migrations:
+          requires:
+            - test-frontend
+            - test-backend
+            - scan-frontend
+            - scan-backend
+            - configure-infrastructure
       
