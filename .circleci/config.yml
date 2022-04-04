@@ -12,7 +12,7 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
-            apt install awscli
+            sudo apt-get install awscli
             aws cloudformation delete-stack --stack-name frontEnd-<< parameters.workflow_id >>
             aws cloudformation delete-stack --stack-name backEnd-<< parameters.workflow_id >>
 
@@ -218,7 +218,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apt install tar gzip awscli
+            sudo apt-get install tar gzip awscli
       - attach_workspace:
           at: .
       - run:
