@@ -215,13 +215,13 @@ jobs:
     <<: *aws_cli
     steps:
       - checkout
-      - attach_workspace:
-          at: .
       - run:
           name: Install dependencies
           command: |
             sudo yum install -y nodejs npm tar
             node --version
+      - attach_workspace:
+          at: .
       - run:
           name: Get backend url
           working_directory: ./frontend
