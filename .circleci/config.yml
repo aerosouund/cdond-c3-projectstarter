@@ -210,7 +210,7 @@ jobs:
                 curl -i https://kvdb.io/3yfxqrxiUbHC7JsDyQVhMj/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
       - destroy_environment:
-          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   deploy-frontend:
     <<: *aws_cli
