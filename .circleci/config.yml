@@ -212,14 +212,13 @@ jobs:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   deploy-frontend:
-    <<: *aws_cli
+    <<: *node_image
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: |
-            yum install -y nodejs npm tar gzip
-            node --version
+            apt install tar gzip awscli
       - attach_workspace:
           at: .
       - run:
