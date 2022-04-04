@@ -19,21 +19,19 @@ commands:
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
-      param:
-        type: string    
+      workflow_id:
+        type: string  
     steps:
       - run:
           name: Revert migrations
           when: on_fail
+          working_directory: ./backend
           command: |
-            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS = 1
+            SUCCESS=$(curl --insecure  https://kvdb.io/3yfxqrxiUbHC7JsDyQVhMj/migration_<< parameters.workflow_id >>)
             if(( $SUCCESS==1 )); 
             then
-            #  cd ~/project/backend
-            #  npm install
-            #  Add revert code here. You can find this in the Getting Started section.
-              exit 1
+                npm i
+                npm run migration:revert
             fi
 
 
@@ -206,7 +204,7 @@ jobs:
       - run:
           name: Send migration results to kvdb
           command: |
-            if grep -q "has been executed successfully." ~/project/backend/migrations-log.txt
+            if grep -q "has been executed successfully." ~/project/backend/migrations-log
             then
                 curl -i https://kvdb.io/3yfxqrxiUbHC7JsDyQVhMj/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
@@ -217,21 +215,36 @@ jobs:
     <<: *aws_cli
     steps:
       - checkout
+      - attach_workspace:
+          at: .
       - run:
           name: Install dependencies
           command: |
-            # your code here
+            sudo yum install -y nodejs npm
+            node --version
       - run:
           name: Get backend url
+          working_directory: ./frontend
           command: |
-            # your code here
+            export BACKEND_IP = ${aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters "Name=tag:project,Values=udacityBackend"}
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
+            echo ${API_URL} >> .env
+            cat .env
       - run:
           name: Deploy frontend objects
+          working_directory: ./frontend
           command: |
-            # your code here
-      # Here's where you will add some code to rollback on failure      
+            npm i
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      - destroy_environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}     
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
                     
   deploy-backend:
     <<: *alpine
@@ -251,7 +264,7 @@ jobs:
           command: |
             # your code here
       - destroy_environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:5}
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   smoke-test:
     <<: *alpine
@@ -333,4 +346,7 @@ workflows:
             - scan-frontend
             - scan-backend
             - configure-infrastructure
+      - deploy-frontend:
+          requires:
+            - run-migrations
       
