@@ -188,7 +188,7 @@ jobs:
           command: |
             ansible-playbook -i inventory.txt configure-server.yml
       - destroy_environment:
-          id: ${CIRCLE_WORKFLOW_ID:0:5}     
+          id: ${CIRCLE_WORKFLOW_ID:0:7}     
 
   run-migrations:
     <<: *node_image
@@ -317,4 +317,7 @@ workflows:
       - scan-frontend:
           requires: [build-frontend]
       - deploy-infrastructure
+      - configure-infrastructure:
+          requires:
+            - deploy-infrastructure
       
