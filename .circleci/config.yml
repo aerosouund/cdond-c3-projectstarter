@@ -12,6 +12,7 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
+            sudo apt install awscli
             aws cloudformation delete-stack --stack-name frontEnd-<< parameters.workflow_id >>
             aws cloudformation delete-stack --stack-name backEnd-<< parameters.workflow_id >>
 
