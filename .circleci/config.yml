@@ -278,7 +278,10 @@ jobs:
           command: |
               cat inventory
               ansible-playbook -i inventory deploy-backend.yml
-      
+      - destroy_environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   smoke-test:
     <<: *alpine
@@ -307,10 +310,7 @@ jobs:
             else
                 return 1
             fi
-      - destroy_environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-      - revert-migrations:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      
 
   cloudfront-update:
     <<: *aws_cli
