@@ -232,7 +232,7 @@ jobs:
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters "Name=tag:project,Values=udacityBackend" \
             --output text)
-            curl -i https://kvdb.io/3yfxqrxiUbHC7JsDyQVhMj/BACKEND_IP -d "http://${BACKEND_IP}:3030"
+            curl --insecure https://kvdb.io/3yfxqrxiUbHC7JsDyQVhMj/BACKEND_IP -d "http://${BACKEND_IP}:3030"
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
             echo ${API_URL} >> .env
