@@ -265,23 +265,12 @@ jobs:
             pip install awscli
             aws --version
       - run:
-          name: install backend
-          working_directory: ./backend
-          command: |
-            npm i
-            npm run build
-            cd ..
-            tar -C backend -czvf artifact.tar.gz .
-      - run:
           name: run ansible playbook
           working_directory: .circleci/ansible
           command: |
               cat inventory
               ansible-playbook -i inventory deploy-backend.yml
-      - destroy_environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-      - revert-migrations:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      
 
   smoke-test:
     <<: *alpine
