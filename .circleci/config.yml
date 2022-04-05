@@ -256,18 +256,32 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints: ["ff:1e:ed:36:12:30:81:b4:58:35:ae:2a:71:e1:8a:47"]
-      # attach workspace
+      - attach_workspace:
+          at: .
       - run:
           name: Install dependencies
           working_directory: /tmp
           command: |
-            apk add --update ansible curl npm nodejs
+            apk add --update ansible curl npm nodejs tar
             pip install awscli
+            aws --version
       - run:
           name: Deploy backend
+          working_directory: ./backend
           command: |
-            # your code here
+            npm i
+            npm run build
+            cd ..
+            tar -C backend -czvf artifact.tar.gz .
+      - run:
+          name: run ansible playbook
+          working_directory: .circleci/ansible
+          command: |
+              cat inventory
+              ansible-playbook -i inventory deploy-backend.yml
       - destroy_environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   smoke-test:
