@@ -296,6 +296,7 @@ jobs:
           name: Get backend url and smoke test
           command: |
             export BACKEND_IP=$(curl --insecure https://kvdb.io/3yfxqrxiUbHC7JsDyQVhMj/BACKEND_IP)
+            echo $BACKEND_IP
             curl "$BACKEND_IP/api/status"
 
       - run:
