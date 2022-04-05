@@ -1,0 +1,18 @@
+---
+
+  - name: "move the backend binaries to server"
+    become: yes
+    synchronize:
+      src: ../../backend/dist
+      dest: /home/ubuntu/backend
+      recursive: true
+
+
+  - name: "install dependencies"
+    shell: npm i
+
+
+  - name: "start the application"
+    shell: |
+      pm2 stop default
+      pm2 start npm -- start
