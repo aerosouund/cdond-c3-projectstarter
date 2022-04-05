@@ -262,7 +262,7 @@ jobs:
           name: Install dependencies
           working_directory: /tmp
           command: |
-            apk add --update ansible curl npm nodejs tar rsync
+            apk add --update ansible curl npm nodejs tar rsync openssh
             pip install awscli
             aws --version
       - run:
