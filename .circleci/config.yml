@@ -265,6 +265,14 @@ jobs:
             pip install awscli
             aws --version
       - run:
+          name: install backend
+          working_directory: ./backend
+          command: |
+            npm i
+            npm run build
+            cd ..
+            tar -C backend -czvf artifact.tar.gz .
+      - run:
           name: run ansible playbook
           working_directory: .circleci/ansible
           command: |
