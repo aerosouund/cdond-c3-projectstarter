@@ -9,13 +9,19 @@
       recursive: true
 
 
-  - name: "install dependencies"
-    shell: npm i
+  - name: "move application dependencies"
+    become: yes
+    synchronize:
+      src: ../../backend/node_modules
+      dest: /home/ubuntu/uda_app
+      recursive: true
 
 
-  - name: "delete anything that might already be running"
+  - name: "stop existing apps"
     become: true
-    command: pm2 delete all
+    command: |
+      pm2 stop default
+      pm2 delete all
     ignore_errors: true
 
 
