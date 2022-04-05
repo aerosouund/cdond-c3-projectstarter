@@ -1,9 +1,5 @@
 ---
 
-  - name: "install dependencies"
-    become: yes
-    apt:
-      name: rsync
 
   - name: "move the backend binaries to server"
     become: yes
