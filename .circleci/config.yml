@@ -351,7 +351,9 @@ jobs:
         - run:
             name: Get old stack workflow id
             command: |
-              export OldWorkflowID=$(curl -insecure https://kvdb.io/3yfxqrxiUbHC7JsDyQVhMj/OldWorkflowID)
+              export OldWorkflowID=$(aws cloudformation \
+              list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+              --no-paginate --output text)
         - run:
             name: Remove old stacks and files
             command: |
@@ -364,8 +366,8 @@ jobs:
                 echo "Nothing to do!"
               fi
 
-        
-            
+
+
 
 workflows:
   default:
