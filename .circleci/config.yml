@@ -367,10 +367,6 @@ jobs:
               else
                 echo "Nothing to do!"
               fi
-        - run:
-            name: delete s3 bucket
-            command: |
-              aws s3 rm "s3://$OldWorkflowID" --recursive
 
 
 
