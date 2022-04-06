@@ -343,21 +343,23 @@ jobs:
           workflow_id: ${CIRCLE_WORKFLOW_ID}
 
 cleanup:
-    <<: *alpine
+    <<: *aws_cli
     steps:
       - checkout
       - run:
           name: Get old stack workflow id
           command: |
-            # your code here
-            export OldWorkflowID="the id here"
-            export STACKS=[] #put the list of stacks here
+            export OldWorkflowID=$(curl -insecure https://kvdb.io/3yfxqrxiUbHC7JsDyQVhMj/OldWorkflowID)
       - run:
           name: Remove old stacks and files
           command: |
-            if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
+            if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
             then
-              # your code here
+              aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
+              aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
+              aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
+            else
+              echo "Nothing to do!"
             fi
             
 
@@ -398,4 +400,7 @@ workflows:
       - cloudfront-update:
           requires:
             - smoke-test
+      - cleanup:
+          requires:
+            - cloudfront-update
       
