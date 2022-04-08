@@ -385,7 +385,11 @@ workflows:
           requires: [build-backend]
       - scan-frontend:
           requires: [build-frontend]
-      - deploy-infrastructure
+      - deploy-infrastructure:
+          filters:
+            branches:
+              only:
+                - master
       - configure-infrastructure:
           requires:
             - deploy-infrastructure
@@ -396,6 +400,10 @@ workflows:
             - scan-frontend
             - scan-backend
             - configure-infrastructure
+          filters:
+            branches:
+              only:
+                - master
       - deploy-frontend:
           requires:
             - run-migrations
