@@ -234,6 +234,7 @@ jobs:
             curl --insecure https://kvdb.io/3yfxqrxiUbHC7JsDyQVhMj/BACKEND_IP -d "http://${BACKEND_IP}:3030"
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
+            npm i
             npm run build
       - run:
           name: Deploy frontend objects
