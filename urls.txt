@@ -1,0 +1,3 @@
+cloudfront: https://d2fj66pjv8eh6c.cloudfront.net/#/employees
+s3: https://udapeople-31e71c0.s3.amazonaws.com/index.html
+repo: https://github.com/aerosouund/cdond-c3-projectstarter
